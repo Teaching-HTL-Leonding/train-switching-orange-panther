@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Security.Authentication;
 
 namespace TrainSwitching.Logic;
 
@@ -6,11 +7,15 @@ public class TrainStation
 {
     public Track[] Tracks { get; }
 
-     public TrainStation()
+    public TrainStation()
     {
-        // int[] tracks = Tracks;
-        // TODO: Implement this method
-        throw new NotImplementedException();
+        Tracks = new Track[10];
+        for (int i = 0; i < 10; i++)
+        {
+            Tracks[i] = new Track();
+            Tracks[i].TrackNumber = i + 1;
+        }
+    
     }
     /// <summary>
     /// Tries to apply the given operation to the train station.
@@ -69,8 +74,9 @@ public class TrainStation
                 Tracks[op.TrackNumber].Wagons.Clear();
                 break;
             case Constants.OPERATION_REMOVE:
-                for (int i = 0; i < op.NumberOfWagons; i++){
-                    Tracks[op.TrackNumber].Wagons.RemoveAt(Tracks[op.TrackNumber].Wagons.Count -1);
+                for (int i = 0; i < op.NumberOfWagons; i++)
+                {
+                    Tracks[op.TrackNumber].Wagons.RemoveAt(Tracks[op.TrackNumber].Wagons.Count - 1);
                 }
                 break;
         }
@@ -86,6 +92,33 @@ public class TrainStation
     /// </remarks>
     public int CalculateChecksum()
     {
+        const int PASSENGER = 1;
+        const int LOCOMOTIVE = 10;
+        const int FREIGHT = 20;
+        const int CAR = 30;
+        var sums = new int[Tracks.Length];
+        int tracksum;
+
+        for (int i = 1; i < Tracks.Length; i++)
+        {
+            tracksum = 0;
+            for (int j = 0; j < Tracks[i].Wagons.Count; j++)
+            {
+                tracksum += Tracks[i].Wagons[j] switch
+                {
+                    Constants.WAGON_TYPE_PASSENGER => PASSENGER,
+                    Constants.WAGON_TYPE_LOCOMOTIVE => LOCOMOTIVE,
+                    Constants.WAGON_TYPE_FREIGHT => FREIGHT,
+                    Constants.WAGON_TYPE_CAR_TRANSPORT => CAR,
+                    _ => throw new InvalidOperationException("This wagon type is invalid.")
+                };
+            }
+            sums[i] = tracksum;
+        }
+
+        return sums.Sum();
+
+
         // TODO: Implement this method
         throw new NotImplementedException();
     }
