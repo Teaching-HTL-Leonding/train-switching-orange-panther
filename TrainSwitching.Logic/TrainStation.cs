@@ -15,7 +15,7 @@ public class TrainStation
             Tracks[i] = new Track();
             Tracks[i].TrackNumber = i + 1;
         }
-    
+
     }
     /// <summary>
     /// Tries to apply the given operation to the train station.
@@ -25,6 +25,7 @@ public class TrainStation
     public bool TryApplyOperation(SwitchingOperation op)
     {
         // TODO: Implement this method
+        var trackID = op.TrackNumber - 1;
         if (op.TrackNumber > 10 || op.TrackNumber < 1)
         {
             return false;
@@ -35,12 +36,12 @@ public class TrainStation
             return false;
         }
 
-        if (op.OperationType == Constants.OPERATION_TRAIN_LEAVE && Tracks[op.TrackNumber].Wagons.Count == 0)
+        if (op.OperationType == Constants.OPERATION_TRAIN_LEAVE && Tracks[trackID].Wagons.Count == 0)
         {
             return false;
         }
 
-        if (op.OperationType == Constants.OPERATION_REMOVE && (Tracks[op.TrackNumber].Wagons.Count < op.NumberOfWagons))
+        if (op.OperationType == Constants.OPERATION_REMOVE && (Tracks[trackID].Wagons.Count < op.NumberOfWagons))
         {
             return false;
         }
@@ -48,9 +49,9 @@ public class TrainStation
         if (op.OperationType == Constants.OPERATION_TRAIN_LEAVE)
         {
             bool locomotiveIsThere = false;
-            for (int i = 0; i < Tracks[op.TrackNumber].Wagons.Count; i++)
+            for (int i = 0; i < Tracks[trackID].Wagons.Count; i++)
             {
-                if (Tracks[op.TrackNumber].Wagons[i] == Constants.WAGON_TYPE_LOCOMOTIVE)
+                if (Tracks[trackID].Wagons[i] == Constants.WAGON_TYPE_LOCOMOTIVE)
                 {
                     locomotiveIsThere = true;
                 }
@@ -63,20 +64,27 @@ public class TrainStation
             case Constants.OPERATION_ADD:
                 if (op.Direction == Constants.DIRECTION_EAST)
                 {
-                    Tracks[op.TrackNumber].Wagons.Add((int)op.WagonType!);
+                    Tracks[trackID].Wagons.Add((int)op.WagonType!);
                 }
                 else
                 {
-                    Tracks[op.TrackNumber].Wagons.Insert(0, (int)op.WagonType!);
+                    Tracks[trackID].Wagons.Insert(0, (int)op.WagonType!);
                 }
                 break;
             case Constants.OPERATION_TRAIN_LEAVE:
-                Tracks[op.TrackNumber].Wagons.Clear();
+                Tracks[trackID].Wagons.Clear();
                 break;
             case Constants.OPERATION_REMOVE:
                 for (int i = 0; i < op.NumberOfWagons; i++)
                 {
-                    Tracks[op.TrackNumber].Wagons.RemoveAt(Tracks[op.TrackNumber].Wagons.Count - 1);
+                    if (op.Direction == Constants.DIRECTION_EAST)
+                    {
+                        Tracks[trackID].Wagons.RemoveAt(Tracks[trackID].Wagons.Count - 1);
+                    }
+                    else
+                    {
+                        Tracks[trackID].Wagons.RemoveAt(0);
+                    }
                 }
                 break;
         }
@@ -99,7 +107,7 @@ public class TrainStation
         var sums = new int[Tracks.Length];
         int tracksum;
 
-        for (int i = 1; i < Tracks.Length; i++)
+        for (int i = 0; i < Tracks.Length; i++)
         {
             tracksum = 0;
             for (int j = 0; j < Tracks[i].Wagons.Count; j++)
@@ -113,13 +121,10 @@ public class TrainStation
                     _ => throw new InvalidOperationException("This wagon type is invalid.")
                 };
             }
-            sums[i] = tracksum;
+            sums[i] = tracksum * (i + 1);
         }
 
         return sums.Sum();
 
-
-        // TODO: Implement this method
-        throw new NotImplementedException();
     }
 }
