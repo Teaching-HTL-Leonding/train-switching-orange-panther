@@ -24,7 +24,6 @@ public class TrainStation
     /// <returns>Returns true if the operation could be applied, otherwise false</returns>
     public bool TryApplyOperation(SwitchingOperation op)
     {
-        // TODO: Implement this method
         var trackID = op.TrackNumber - 1;
         if (op.TrackNumber > 10 || op.TrackNumber < 1)
         {
@@ -125,6 +124,5 @@ public class TrainStation
         }
 
         return sums.Sum();
-
     }
 }
